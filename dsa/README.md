@@ -1,1 +1,1 @@
-### Code practice for [Data Structure and Algorithm Analysis in C](http://www.baidu.com)
+### Code practice for [Data Structure and Algorithm Analysis in C](https://www.amazon.cn/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95%E5%88%86%E6%9E%90-C%E8%AF%AD%E8%A8%80%E6%8F%8F%E8%BF%B0-%E9%9F%A6%E6%96%AF/dp/B003X4LF4U/ref=sr_1_3?s=books&ie=UTF8&qid=1460108726&sr=1-3&keywords=Data+Structure+and+Algorithm)
