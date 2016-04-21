@@ -164,7 +164,7 @@ class HMM:
         for t in range(T):
             denominator = 0.0
             for i in range(self.N):
-                gamma[t][i] = alpha[t][i] * beta[i][i];
+                gamma[t][i] = alpha[t][i] * beta[t][i];
                 denominator += gamma[t][i];
             # why ?
             # because sum(i=0:N-1) of gamma[t] should be 1.
@@ -174,7 +174,7 @@ class HMM:
         return gamma
 
 
-    def countXi(self, T, alpha, beta):
+    def countXi(self, T, alpha, beta, O):
         xi = np.zeros((T, self.N, self.N), np.float)
         for t in range(T-1):
             denominator = 0.0
@@ -200,7 +200,7 @@ class HMM:
             beta = self.countBetaWithScale(O,scale)
             
             gamma = self.countGamma(T, alpha, beta)
-            xi = self.countXi(T, alpha, beta) 
+            xi = self.countXi(T, alpha, beta, O) 
             
             # count pi
             pi = 0.001 + 0.999 * gamma[0]; 
