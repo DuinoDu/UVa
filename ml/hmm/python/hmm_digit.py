@@ -4,18 +4,36 @@ import numpy as np
 def readInitHMM():
     HMM = np.loadtxt('init.hmm')
     A = HMM[0:16, :]
-    B = HMM[16:32, :]
+    B = HMM[16:31, :]
     pi = HMM[32,:]
     return A,B,pi
 
 def convertToAngle(X):
-    angle = np.zeros((22,))
-    # start from here
+    angle = np.zeros((22,110), dtype = np.float)
+    for i in range(22):
+        cnt_angle = 0
+        for j in range(110-1):
+            if( (X[i,j,1] != X[i,j+1,1]) or (X[i,j,0] != X[i,j+1,0])):
+                if(X[i,j+1,0] > X[i,j,0]):# p2 is in the right of p1
+                    tmp = np.arctan(1.0*(X[i,j+1,1] - X[i,j,1])/(X[i,j+1,0] - X[i,j,0]))
+                    angle[i,cnt_angle] = -1.0*tmp/np.pi*180
+                elif(X[i,j+1,0] < X[i,j,0]): # p2 is in the left of p1
+                    tmp = np.arctan(1.0*(X[i,j+1,1] - X[i,j,1])/(X[i,j+1,0] - X[i,j,0]))
+                    angle[i,cnt_angle] = 180-1.0*tmp/np.pi*180
+                elif(X[i,j+1,0] == X[i,j,0]): # p2 is in the same x-axis as p1
+                    if(X[i,j+1,1] > X[i,j,1]):
+                        angle[i,cnt_angle] = -90
+                    else:
+                        angle[i,cnt_angle] = 90
+                angle[i,cnt_angle] += 90
+                angle[i,cnt_angle] = np.floor(angle[i,cnt_angle] / 22.5) + 1
+                cnt_angle += 1
+    return angle 
 
 def readUJI(path):
-    X = np.zeros((20,110,2))
+    X = np.zeros((220,110,2))
     j = 0
-    for m in range(1,2):
+    for m in range(1,12):
         if m < 10:
             fileStr = open(path+"/UJIpenchars-w0"+str(m)).read().replace('\n',' ').split(' ')
         else:
@@ -47,12 +65,24 @@ def readUJI(path):
 
                     k = 0
                     j += 1 #add a digit
-            i += 1    
-    angle = convertToAngle(X)
-
-
-
-
+            i += 1   
+    
+    for i in range(10):
+        X_save = np.zeros((22,110,2), dtype=np.int32)
+        for j in range(22):
+            X_save[j,:,:] = X[i+j*10, :, :]
+        angle = convertToAngle(X_save)
+        
+        f = open('./data/'+str(i)+'.txt','w+')
+        for j in range(22):
+            s = ""
+            for k in range(110):
+                if(angle[j,k]!=0):
+                    s += str(int(angle[j,k]))
+                    s += ' '
+            s += "\n"
+            f.write(s)
+        f.close()
 
 def readObs(filename):
     O = []
@@ -67,15 +97,16 @@ def readObs(filename):
 
 if __name__ == '__main__':
 
-    readUJI('./data')
+    # Read data form ./data/UJIpenchars-w** and tranform to ./data/*.txt
+    # Each *.txt contains 22 records for one digit.
+    #  
+    #readUJI('./data')
 
-    '''
     A,B,pi = readInitHMM()
     mHMMs = []
     O = []
     for i in range(10):
-        O.append(readObs('data/'+str(i)+'.txt'))
-
+        O.append(readObs('./data/'+str(i)+'.txt'))
     # learning
     for i in range(10):
         A_ave = np.zeros((16,16))
@@ -91,7 +122,6 @@ if __name__ == '__main__':
         B_ave /= 11.0
         pi_ave /= 11.0 
         bestHMM = hmm.HMM(A_ave, B_ave, pi_ave)
-        
         mHMMs.append(bestHMM) 
 
     # test
@@ -106,4 +136,3 @@ if __name__ == '__main__':
                     maxP = pro
                     y = i
             print "data O[",j,"] is ",y
-    '''
